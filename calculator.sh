@@ -1,60 +1,53 @@
 #!/bin/bash
 
-# Usage function
-echo_usage() {
-    echo "Usage: $0 operand1 operator operand2"
-    exit 1
+# Simple Calculator Script
+# Usage: ./calculator.sh operand1 operator operand2
+
+# Define a function to log history
+log_history() {
+    echo "$(date): $1" >> history.txt
 }
 
-# Check for correct number of arguments
 if [ "$#" -ne 3 ]; then
-    echo_usage
+    echo "Usage: $0 operand1 operator operand2"
+    exit 1
 fi
 
-# Validate operand types
-if ! [[ $1 =~ ^[0-9]+(\.[0-9]+)?$ ]] || ! [[ $3 =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
-    echo "Error: Invalid operand(s). Both operands must be numeric."
-    exit 4
+operand1=$1
+operator=$2
+operand2=$3
+
+# Validate operands
+if ! [[ $operand1 =~ ^-?[0-9]+([.][0-9]+)?$ ]] || ! [[ $operand2 =~ ^-?[0-9]+([.][0-9]+)?$ ]]; then
+    echo "Error: operands must be numbers"
+    exit 1
 fi
 
-# Check valid operators
-OPERATOR=$2
-case $OPERATOR in
-    +|-|\*|/)
-        :
-    ;;
-    *)
-        echo "Error: Invalid operator. Supported operators are +, -, *, /."
-        exit 5
-    ;;
-esac
-
-# Handle division by zero
-if [ "$OPERATOR" == "/" ] && [ "$3" == "0" ]; then
-    echo "Error: Division by zero is not allowed."
-    exit 2
-fi
-
-# Perform calculation
-case $OPERATOR in
+case $operator in
     +)
-        RESULT=$(echo "$1 + $3" | bc)
-    ;;
+        result=$(echo "$operand1 + $operand2" | bc)
+        ;;  
     -)
-        RESULT=$(echo "$1 - $3" | bc)
-    ;;
+        result=$(echo "$operand1 - $operand2" | bc)
+        ;;  
     \*)
-        RESULT=$(echo "$1 * $3" | bc)
-    ;;
+        result=$(echo "$operand1 * $operand2" | bc)
+        ;;  
     /)
-        RESULT=$(echo "$1 / $3" | bc)
-    ;;
+        if [ "$operand2" == "0" ]; then
+            echo "Error: Division by zero"
+            exit 1
+        fi
+        result=$(echo "$operand1 / $operand2" | bc)
+        ;;  
     *)
-        echo "Unknown error occurred."
-        exit 6
-    ;;
+        echo "Error: Invalid operator"
+        exit 1
+        ;;  
 esac
 
-# Log the result
-echo "Result: $RESULT"
-echo "${1} ${OPERATOR} ${3} = ${RESULT}" >> history.txt
+# Output the result
+echo "$operand1 $operator $operand2 = $result"
+
+# Log the history
+log_history "$operand1 $operator $operand2 = $result"
