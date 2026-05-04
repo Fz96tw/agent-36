@@ -1,57 +1,48 @@
 #!/bin/bash
 
+run_calculator() {
+    ./calculator.sh "$@"
+}
+
+check_result() {
+    if [ "$1" == "$2" ]; then
+        echo "Test passed: $3"
+    else
+        echo "Test failed: $3 (Expected: $2, Got: $1)"
+    fi
+}
+
+# Unit Tests for Valid Inputs
+result=$(run_calculator 3 + 2)
+check_result "$result" "5" "Addition test"
+
+result=$(run_calculator 5 - 2)
+check_result "$result" "3" "Subtraction test"
+
+result=$(run_calculator 4 '*' 2)
+check_result "$result" "8" "Multiplication test"
+
+result=$(run_calculator 10 / 2)
+check_result "$result" "5" "Division test"
+
+# Edge Cases
+result=$(run_calculator 10 / 0)
+check_result "$result" "Error: Division by zero" "Division by zero test"
+
+result=$(run_calculator 10 ^ 2)
+check_result "$result" "Invalid operator: ^" "Invalid operator test"
+
+result=$(run_calculator not_a_number + 2)
+check_result "$result" "Invalid number input" "Invalid number test"
+
+# Test Logging Functionality
+run_calculator 5 + 3
+log_entry="5 + 3 = 8"
+if grep -q "$log_entry" history.txt; then
+    echo "Logging test passed: $log_entry found in history.txt"
+else
+    echo "Logging test failed: $log_entry not found in history.txt"
+fi
+
+# Cleanup
 > history.txt
-
-
-test_parsing() {
-  output=$(./calculator.sh)  # Replace with the path to your calculator script
-  [[ "$output" == "Usage: ./calculator.sh operand1 operator operand2" ]]
-}
-
-test_addition() {
-  output=$(./calculator.sh 5 + 3)
-  [[ "$output" == "5 + 3 = 8" ]]
-}
-
-test_subtraction() {
-  output=$(./calculator.sh 5 - 3)
-  [[ "$output" == "5 - 3 = 2" ]]
-}
-
-test_multiplication() {
-  output=$(./calculator.sh 5 '*' 3)
-  [[ "$output" == "5 * 3 = 15" ]]
-}
-
-test_division() {
-  output=$(./calculator.sh 6 / 3)
-  [[ "$output" == "6 / 3 = 2" ]]
-}
-
-test_division_by_zero() {
-  output=$(./calculator.sh 5 / 0)
-  [[ "$output" == "Error: Division by zero" ]]
-}
-
-test_logging() {
-  log=$(tail -n 1 history.txt)
-  [[ "$log" == "operand1 operator operand2 = result" ]]  # Adjust according to test
-}
-
-# Execute Tests
-
-test_parsing
-
-test_addition
-
-test_subtraction
-
-test_multiplication
-
-test_division
-
-test_division_by_zero
-
-test_logging
-
-echo "All tests completed!"
